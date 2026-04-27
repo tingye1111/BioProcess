@@ -129,7 +129,7 @@ mu_max_model = mu_max                  # 1/h
 Y_XS = Y_OD_Brix_total                 # OD/Brix
 
 # 需要假設或之後 fitting 的參數
-Ks =   3                      # Brix，可自行調整
+Ks =   7.8                      # Brix，可自行調整
 Y_PX = 0.5                             # Product/OD (產物對細胞產率)
 Y_PS = Y_XS*Y_PX                            # Product/Brix (產物對基質產率) <- 新增此參數
 
