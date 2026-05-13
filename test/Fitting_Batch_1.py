@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import os
 import sys
 import numpy as np
-
 from scipy.integrate import solve_ivp
 from scipy.optimize import least_squares
 
@@ -333,29 +332,104 @@ def calculate_r2(y_exp, y_fit):
 OD_R2 = calculate_r2(X_exp, X_fit_exp)
 Brix_R2 = calculate_r2(S_exp, S_fit_exp)
 
+def evaluate_model(y_exp, y_pred):
+    residual = y_pred - y_exp
+
+    rmse = np.sqrt(np.mean(residual ** 2))
+    mae = np.mean(np.abs(residual))
+
+    ss_res = np.sum((y_exp - y_pred) ** 2)
+    ss_tot = np.sum((y_exp - np.mean(y_exp)) ** 2)
+
+    if ss_tot == 0:
+        r2 = np.nan
+    else:
+        r2 = 1 - ss_res / ss_tot
+
+    return rmse, mae, r2
+
+
+OD_RMSE, OD_MAE, OD_R2 = evaluate_model(X_exp, X_fit_exp)
+Brix_RMSE, Brix_MAE, Brix_R2 = evaluate_model(S_exp, S_fit_exp)
+
 # =====================================================
 # 16. 印出重要結果
 # =====================================================
-print("\n========== 整體相對產率 ==========")
-print(f"初始 OD = {OD_initial:.4f}")
-print(f"最高 OD = {OD_max:.4f}")
-print(f"初始 Brix = {Brix_initial:.4f}")
-print(f"整體相對產率 Y_OD/Brix = {Y_OD_Brix_total:.4f} OD/Brix")
+# =====================================================
+# 16. 印出重要結果與模型評估指標
+# =====================================================
 
-print("\n========== Fitting 結果：三參數擬合 ==========")
-print(f"Initial guess for μmax = {mu_max_guess:.4f} 1/h")
-print(f"Fitted μmax = {mu_max_fit:.4f} 1/h (td = {0.693/mu_max_fit:.4f} h)")
-print(f"Fitted Ks = {Ks_fit:.4f} Brix")
-print(f"Fitted ms = {ms_fit:.6f} Brix/(OD*h)")
-print(f"Fitting cost = {fit_result.cost:.6f}")
-print(f"OD RMSE = {OD_RMSE:.6f}")
-print(f"Brix RMSE = {Brix_RMSE:.6f}")
+print("\n" + "=" * 60)
+print("Batch Monod Model Fitting Results")
+print("=" * 60)
 
-print("\n========== 模型設定 ==========")
-print(f"Y_XS 固定為 = {Y_XS:.4f} OD/Brix")
-print(f"Y_PX 假設為 = {Y_PX:.4f} Product/OD")
-print(f"OD R² = {OD_R2:.4f}")
-print(f"Brix R² = {Brix_R2:.4f}")
+# -----------------------------
+# 1. Data Information
+# -----------------------------
+print("\n[1] Experimental Data Information")
+print("-" * 60)
+print(f"Initial OD              = {OD_initial:.4f}")
+print(f"Maximum OD              = {OD_max:.4f}")
+print(f"Initial Brix            = {Brix_initial:.4f}")
+print(f"Brix at maximum OD      = {Brix_at_max_od:.4f}")
+print(f"Total reaction time     = {t_end:.4f} h")
+print(f"Number of data points   = {len(t_exp)}")
+
+# -----------------------------
+# 2. Yield Coefficient
+# -----------------------------
+print("\n[2] Estimated Yield Coefficient")
+print("-" * 60)
+print(f"Y_OD/Brix = Y_XS        = {Y_XS:.4f} OD/Brix")
+print(f"Assumed Y_PX            = {Y_PX:.4f} Product/OD")
+
+# -----------------------------
+# 3. Initial Guess
+# -----------------------------
+print("\n[3] Initial Guess for Parameter Fitting")
+print("-" * 60)
+print(f"Initial guess μmax      = {mu_max_guess:.4f} 1/h")
+print(f"Initial guess Ks        = {initial_guess[1]:.4f} Brix")
+print(f"Initial guess ms        = {initial_guess[2]:.6f} Brix/(OD*h)")
+
+# -----------------------------
+# 4. Fitted Parameters
+# -----------------------------
+print("\n[4] Fitted Parameters")
+print("-" * 60)
+print(f"Fitted μmax             = {mu_max_fit:.4f} 1/h")
+print(f"Doubling time, td       = {0.693 / mu_max_fit:.4f} h")
+print(f"Fitted Ks               = {Ks_fit:.4f} Brix")
+print(f"Fitted ms               = {ms_fit:.6f} Brix/(OD*h)")
+print(f"Fitting cost            = {fit_result.cost:.6f}")
+
+# -----------------------------
+# 5. Model Evaluation
+# -----------------------------
+print("\n[5] Model Evaluation")
+print("-" * 60)
+print("OD prediction:")
+print(f"  RMSE                  = {OD_RMSE:.6f} OD")
+print(f"  MAE                   = {OD_MAE:.6f} OD")
+print(f"  R²                    = {OD_R2:.4f}")
+
+print("\nBrix prediction:")
+print(f"  RMSE                  = {Brix_RMSE:.6f} Brix")
+print(f"  MAE                   = {Brix_MAE:.6f} Brix")
+print(f"  R²                    = {Brix_R2:.4f}")
+
+# -----------------------------
+# 6. Final Simulated Values
+# -----------------------------
+print("\n[6] Final Simulated Values")
+print("-" * 60)
+print(f"Final simulated OD      = {X_model[-1]:.4f}")
+print(f"Final simulated Brix    = {S_model[-1]:.4f}")
+print(f"Final simulated Product = {P_model[-1]:.4f}")
+
+print("\n" + "=" * 60)
+print("Model fitting and evaluation completed.")
+print("=" * 60)
 
 # =====================================================
 # 17. 整理模型結果
@@ -513,4 +587,5 @@ axes[2].legend()
 
 
 plt.tight_layout()
+plt.savefig('Plot_1.png')
 plt.show()

@@ -1,0 +1,13 @@
+# config.py
+
+DO_COLUMN_NAME = "D.O(%)"
+Y_PX = 0.1
+P0 = 0.0
+INITIAL_KS = 1.0
+INITIAL_MS = 0.05
+
+LOWER_BOUNDS = [0.0001, 0.0001, 0.0]
+UPPER_BOUNDS = [5.0, 100.0, 10.0]
+
+RTOL = 1e-6
+ATOL = 1e-8
